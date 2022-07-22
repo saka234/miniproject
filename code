@@ -1,0 +1,81 @@
+#define BLYNK_PRINT Serial    // Comment this out to disable prints and save space
+#include <ESP8266WiFi.h>      //sandeeppitta123@gmail.com  PWD: sandeep007
+#include <BlynkSimpleEsp8266.h>
+
+char auth[] = "yNWTTLDKFwl76_tBs-GxC1mSjjj-2EWe";              //Your Project authentication key
+char ssid[] = "water";                                      // Name of your network (HotSpot or Router name)
+char pass[] = "water123";
+
+ WidgetLCD lcd(V0); 
+
+#define trigPin_1 D5
+#define echoPin_1 D6
+int duration_1, distance_1;
+#define RELAY D1
+
+    void setup()
+    {
+     pinMode(trigPin_1, OUTPUT); 
+    pinMode(echoPin_1, INPUT);
+      Serial.begin(9600);
+      Blynk.begin(auth, ssid,pass);
+       pinMode(RELAY,OUTPUT); 
+       
+  lcd.clear();
+  lcd.print(0,0,"   water ");
+  lcd.print(0,1,"LEVEL MONITOR");
+    } 
+
+
+    
+      BLYNK_WRITE(V2) 
+      {
+      int SW1 = param.asInt();
+        Serial.println("V2..............");
+      if (SW1 == HIGH) {
+     digitalWrite(RELAY , HIGH);
+      }
+      else 
+      {
+     digitalWrite(RELAY , LOW);
+      }
+      }
+
+      
+
+ void loop()
+    {
+      
+  Blynk.run();
+
+      
+   digitalWrite(trigPin_1, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin_1, LOW);
+    duration_1 = pulseIn(echoPin_1, HIGH);
+    distance_1 = (duration_1/2) / 29.1;
+
+Serial.print("Sensor 1: ");              
+Serial.println(distance_1);
+
+if( distance_1>30)
+{
+digitalWrite(RELAY , HIGH);
+Blynk.virtualWrite(V1,distance_1);
+Blynk.notify("water level low "); 
+           
+}
+
+if( distance_1<5)
+{
+ digitalWrite(RELAY , LOW);
+Blynk.virtualWrite(V1,distance_1);
+Blynk.notify("water level full "); 
+           
+}
+
+else
+{
+Blynk.virtualWrite(V1,distance_1); 
+delay(500);           
+ }} 
